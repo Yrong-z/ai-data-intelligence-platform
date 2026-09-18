@@ -11,5 +11,7 @@ if (Test-Path $pidFile) {
 }
 $releaseRoot = Split-Path -Parent $platformRoot
 $wshuRoot = if ($env:WSHU_REPO_DIR) { $env:WSHU_REPO_DIR } elseif ($env:WSHU_ROOT) { $env:WSHU_ROOT } else { Join-Path $releaseRoot "text2sql-data-agent" }
-docker compose -p wshu_platform -f (Join-Path $wshuRoot "docker/docker-compose.yaml") down
+$ragRoot = if ($env:RAG_REPO_DIR) { $env:RAG_REPO_DIR } elseif ($env:ZHIKU_ROOT) { $env:ZHIKU_ROOT } else { Join-Path $releaseRoot 'rag-knowledge-agent' }
+if (Test-Path (Join-Path $ragRoot 'docker-compose.milvus.yml')) { docker compose -p rag_platform -f (Join-Path $ragRoot 'docker-compose.milvus.yml') down }
+docker compose -p wshu_platform -f (Join-Path $wshuRoot 'docker/docker-compose.yaml') down
 Write-Host "Stopped platform-owned processes and wshu_platform containers."

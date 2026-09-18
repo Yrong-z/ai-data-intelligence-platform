@@ -11,7 +11,18 @@ The platform maps:
 - `LLM_API_KEY` → Wshu `LLM_API_KEY` and ZhiKu `OPENAI_API_KEY`
 - `LLM_BASE_URL` → Wshu `LLM_BASE_URL` and ZhiKu `OPENAI_API_BASE`
 - `LLM_MODEL` → Wshu `LLM_MODEL` and ZhiKu `LLM_DEFAULT_MODEL`
-- `LLM_MODE`, `IMPORT_MODE`, and `MINERU_API_TOKEN` are passed to backend processes.
+- `RAG_MODE` derives the backend mode switches; `MINERU_API_TOKEN` is passed to ZhiKu for PDF Real import.
+
+## RAG modes
+
+Set only `RAG_MODE` in the platform `.env`.
+
+- `demo`: derives `LLM_MODE=mock`, `IMPORT_MODE=mock`, and `MOCK_SEARCH_EMBEDDING=true`; fixed demo corpus remains available.
+- `real`: derives `LLM_MODE=real`, `IMPORT_MODE=real`, and `MOCK_SEARCH_EMBEDDING=false`; evidence must come from imported Milvus records.
+
+In Real mode the launcher starts the release RAG Milvus Compose project (`rag_platform`) before the RAG API. The BGE-M3 `BGEM3EmbeddingFunction` loads `BAAI/bge-m3` and uses its normal Hugging Face cache; model weights are not committed.
+
+Markdown Real RAG does not require MinerU. PDF Real RAG requires `MINERU_API_TOKEN`.
 
 ## LLM examples
 
@@ -21,7 +32,6 @@ DeepSeek:
 LLM_API_KEY=your-key-here
 LLM_BASE_URL=https://api.deepseek.com
 LLM_MODEL=deepseek-v4-flash
-LLM_MODE=real
 ```
 
 Other OpenAI-compatible providers use their compatible endpoint and model name:
@@ -30,10 +40,9 @@ Other OpenAI-compatible providers use their compatible endpoint and model name:
 LLM_API_KEY=your-key-here
 LLM_BASE_URL=https://your-provider.example.com/v1
 LLM_MODEL=your-model-name
-LLM_MODE=real
 ```
 
-For a safe local demo, leave `LLM_API_KEY` empty and use `LLM_MODE=mock`. Real RAG uses `LLM_MODE=real`; document import defaults to `IMPORT_MODE=mock` unless the ZhiKu deployment is configured for real import services.
+For a safe local demo, leave `LLM_API_KEY` empty and use `RAG_MODE=demo`. Real RAG uses `RAG_MODE=real`; the launcher derives the lower-level switches.
 
 ## One-click startup
 
