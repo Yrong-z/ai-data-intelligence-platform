@@ -1,0 +1,15 @@
+node_modules/
+dist/
+logs/
+tmp/
+output/
+.env
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.idea/
+.vscode/
+.claude/
+.agents/
+skills/

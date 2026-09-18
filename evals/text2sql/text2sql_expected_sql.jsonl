@@ -1,0 +1,3 @@
+{"id":"sql_001","expected_tables":["sales"],"expected_metrics":["sales_amount"]}
+{"id":"sql_002","expected_tables":["sales"],"expected_metrics":["sales_amount"],"must_have":["limit 10"]}
+
