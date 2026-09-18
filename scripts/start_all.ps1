@@ -35,7 +35,7 @@ if ($ragMode -eq "real") {
 }
 $zhikuRoot = if ($env:RAG_REPO_DIR) { $env:RAG_REPO_DIR } elseif ($env:ZHIKU_ROOT) { $env:ZHIKU_ROOT } else { Join-Path $releaseRoot "rag-knowledge-agent" }
 $wshuRoot = if ($env:WSHU_REPO_DIR) { $env:WSHU_REPO_DIR } elseif ($env:WSHU_ROOT) { $env:WSHU_ROOT } else { Join-Path $releaseRoot "text2sql-data-agent" }
-$python = if ($env:PYTHON_EXE) { $env:PYTHON_EXE } else { "python" }
+
 $env:ZHIKU_BASE_URL = if ($env:ZHIKU_BASE_URL) { $env:ZHIKU_BASE_URL } else { "http://127.0.0.1:8010" }
 $env:WSHU_BASE_URL = if ($env:WSHU_BASE_URL) { $env:WSHU_BASE_URL } else { "http://127.0.0.1:8001" }
 $env:VITE_GATEWAY_BASE_URL = if ($env:VITE_GATEWAY_BASE_URL) { $env:VITE_GATEWAY_BASE_URL } else { "http://127.0.0.1:9010" }
@@ -52,8 +52,13 @@ $pidFile = Join-Path $runtime "pids.json"
 New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 foreach ($path in @($zhikuRoot, $wshuRoot, (Join-Path $platformRoot "gateway"), (Join-Path $platformRoot "frontend"))) { if (!(Test-Path $path)) { throw "Missing release repository: $path" } }
 if (!(Get-Command docker -ErrorAction SilentlyContinue)) { throw "Docker is required" }
-if (!(Get-Command uv -ErrorAction SilentlyContinue)) { throw "uv is required" }
-if (!(Get-Command npm -ErrorAction SilentlyContinue)) { throw "npm is required" }
+$gateway = Join-Path $platformRoot "gateway"
+$frontend = Join-Path $platformRoot "frontend"
+$ragPython = Join-Path $zhikuRoot ".venv/Scripts/python.exe"
+$wshuPython = Join-Path $wshuRoot ".venv/Scripts/python.exe"
+$gatewayPython = Join-Path $gateway ".venv/Scripts/python.exe"
+foreach ($path in @($ragPython, $wshuPython, $gatewayPython)) { if (!(Test-Path $path)) { throw "Missing Python environment: $path. Run SETUP_PLATFORM.bat first." } }
+if (!(Test-Path (Join-Path $frontend "node_modules"))) { throw "Missing frontend/node_modules. Run SETUP_PLATFORM.bat first." }
  $ragCompose = Join-Path $zhikuRoot "docker-compose.milvus.yml"
 if ($ragMode -eq "real") {
   if (!(Test-Path $ragCompose)) { throw "Missing Milvus compose file: $ragCompose" }
@@ -76,11 +81,10 @@ function Wait-Http([string]$name, [string]$url, [int]$timeoutSeconds) {
   throw "$name did not become ready: $url"
 }
 if ($ragMode -eq "real") { Wait-Http "Milvus" "http://127.0.0.1:9091/health" 300 }
-Start-Logged "rag" $zhikuRoot "uv run --project '$zhikuRoot' uvicorn main:app --host 127.0.0.1 --port 8010"
+Start-Logged "rag" $zhikuRoot "& '$ragPython' -m uvicorn main:app --host 127.0.0.1 --port 8010"
 $gateway = Join-Path $platformRoot "gateway"
-Start-Logged "gateway" $gateway "uv run --project '$gateway' uvicorn main:app --host 127.0.0.1 --port 9010"
+Start-Logged "gateway" $gateway "& '$gatewayPython' -m uvicorn main:app --host 127.0.0.1 --port 9010"
 $frontend = Join-Path $platformRoot "frontend"
-if (!(Test-Path (Join-Path $frontend "node_modules"))) { npm --prefix $frontend install }
 Start-Logged "frontend" $frontend "npm run dev -- --host 127.0.0.1 --port 5173"
 $processes | ConvertTo-Json | Set-Content -LiteralPath $pidFile -Encoding UTF8
 Wait-Http "RAG" "http://127.0.0.1:8010/openapi.json" 120
@@ -95,9 +99,9 @@ Write-Host "[Wshu] TEI initializing/downloading model..."
 Write-Host "[Wshu] Text-to-SQL is not ready yet."
 docker compose -p wshu_platform -f (Join-Path $wshuRoot "docker/docker-compose.yaml") up -d
 Wait-Http "TEI" "http://127.0.0.1:8081/health" 900
-& $python (Join-Path $wshuRoot "scripts/init_demo_retrieval.py")
+& $wshuPython (Join-Path $wshuRoot "scripts/init_demo_retrieval.py")
 if ($LASTEXITCODE -ne 0) { throw "Wshu retrieval initialization failed." }
-Start-Logged "wshu" $wshuRoot "uv run --project '$wshuRoot' uvicorn app.main:app --host 127.0.0.1 --port 8001"
+Start-Logged "wshu" $wshuRoot "& '$wshuPython' -m uvicorn app.main:app --host 127.0.0.1 --port 8001"
 $processes | ConvertTo-Json | Set-Content -LiteralPath $pidFile -Encoding UTF8
 Wait-Http "Wshu" "http://127.0.0.1:8001/openapi.json" 120
 Write-Host "[Wshu] Ready"

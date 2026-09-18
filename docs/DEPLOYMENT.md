@@ -44,6 +44,10 @@ LLM_MODEL=your-model-name
 
 For a safe local demo, leave `LLM_API_KEY` empty and use `RAG_MODE=demo`. Real RAG uses `RAG_MODE=real`; the launcher derives the lower-level switches.
 
+## First-time setup
+
+Run `SETUP_PLATFORM.bat` once. It runs `uv sync` for the three Python projects, installs frontend dependencies, and pulls required Docker images. If a package download times out, rerun setup; the start script will not reinstall dependencies.
+
 ## One-click startup
 
 With Docker Desktop/Linux engine, uv, npm, and the three sibling repositories present:
