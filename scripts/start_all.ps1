@@ -12,9 +12,14 @@ foreach ($path in @($zhikuRoot, $wshuRoot, (Join-Path $platformRoot "gateway"), 
 if (!(Get-Command docker -ErrorAction SilentlyContinue)) { throw "Docker is required" }
 if (!(Get-Command uv -ErrorAction SilentlyContinue)) { throw "uv is required" }
 if (!(Get-Command npm -ErrorAction SilentlyContinue)) { throw "npm is required" }
-& $python (Join-Path $wshuRoot "scripts/check_embedding_model.py")
-if ($LASTEXITCODE -ne 0) { throw "Wshu embedding model is incomplete; startup stopped before launching a partial stack." }
 docker compose -p wshu_platform -f (Join-Path $wshuRoot "docker/docker-compose.yaml") up -d
+Write-Host "TEI may be downloading BAAI/bge-large-zh-v1.5 on first startup..."
+$deadline = (Get-Date).AddMinutes(15)
+do {
+  try { $tei = Invoke-WebRequest -UseBasicParsing "http://127.0.0.1:8081/health" -TimeoutSec 5; if ($tei.StatusCode -eq 200) { break } } catch { }
+  if ((Get-Date) -gt $deadline) { throw "TEI did not become healthy. Check: docker compose -p wshu_platform logs embedding" }
+  Start-Sleep -Seconds 5
+} while ($true)
 & $python (Join-Path $wshuRoot "scripts/init_demo_retrieval.py")
 if ($LASTEXITCODE -ne 0) { throw "Wshu retrieval initialization failed." }
 $processes = @()
