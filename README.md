@@ -14,13 +14,45 @@ and is not copied into this platform repository.
 
 ## Quick Start
 
-1. Start ZhiKu and Wshu using their repository instructions.
-2. Set `ZHIKU_BASE_URL` and `WSHU_BASE_URL` for the gateway.
-3. Start the gateway from `gateway/` with Uvicorn.
-4. Start the frontend with `npm install` and `npm run dev`.
+From this repository, run the one-click launcher. It starts the fixed Compose
+project `wshu_platform`, waits for TEI, initializes retrieval, then starts both
+APIs, the Gateway, and the Vite frontend:
 
-Default local endpoints are gateway `9010`, ZhiKu `8010`, Wshu `8001`, and
-frontend `5173`; backend addresses are configurable through environment variables.
+```powershell
+copy .env.example .env
+powershell -ExecutionPolicy Bypass -File scripts/start_all.ps1
+```
+
+The first Wshu startup may take time while TEI downloads its model into the
+Docker cache volume.
+
+## Manual Start
+
+```powershell
+docker compose -p wshu_platform -f ../text2sql-data-agent/docker/docker-compose.yaml up -d
+uv run --project ../rag-knowledge-agent uvicorn main:app --host 127.0.0.1 --port 8010
+uv run --project ../text2sql-data-agent uvicorn app.main:app --host 127.0.0.1 --port 8001
+uv run --project gateway uvicorn main:app --host 127.0.0.1 --port 9010
+cd frontend; npm install; npm run dev
+```
+
+## Access URLs
+
+- Frontend: http://localhost:5173
+- Gateway: http://localhost:9010
+- RAG API: http://localhost:8010/docs
+- Text-to-SQL API: http://localhost:8001/docs
+
+The frontend home navigation exposes `RAG Knowledge` for upload/query and
+`Text-to-SQL` for natural-language data questions. Backend addresses remain
+configurable through `ZHIKU_BASE_URL` and `WSHU_BASE_URL`; the frontend Gateway
+address uses `VITE_GATEWAY_BASE_URL`.
+
+## Stop
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/stop_all.ps1
+```
 
 ## Core Flow
 
@@ -47,6 +79,6 @@ docs/       Architecture and deployment notes
 
 ## Current Limitations
 
-- The gateway requires both backend services to be started separately.
-- Wshu Docker clean-run has not been verified in this environment.
+- The one-click launcher requires Docker, uv, npm, and internet access for the
+  first TEI model download.
 - Authentication, tenancy, and production observability are outside this shell.

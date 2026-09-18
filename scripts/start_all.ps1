@@ -36,4 +36,12 @@ $frontend = Join-Path $platformRoot "frontend"
 if (!(Test-Path (Join-Path $frontend "node_modules"))) { npm --prefix $frontend install }
 $processes += Start-Logged "frontend" $frontend "npm run dev -- --host 127.0.0.1 --port 5173"
 $processes | ConvertTo-Json | Set-Content -LiteralPath $pidFile -Encoding UTF8
-Write-Host "Started platform services."
+Write-Host ""
+Write-Host "========================================="
+Write-Host "AI Data Intelligence Platform is ready"
+Write-Host "========================================="
+Write-Host "Frontend:          http://localhost:5173"
+Write-Host "Gateway:           http://localhost:9010"
+Write-Host "RAG API:           http://localhost:8010/docs"
+Write-Host "Text-to-SQL API:   http://localhost:8001/docs"
+Write-Host "Stop:              powershell -ExecutionPolicy Bypass -File scripts/stop_all.ps1"

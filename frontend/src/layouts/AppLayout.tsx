@@ -13,8 +13,8 @@ export function AppLayout() {
 
   const pages = [
     { key: "dashboard", label: "总览", icon: Gauge, component: <DashboardPage /> },
-    { key: "knowledge", label: "智库问答", icon: BookOpen, component: <KnowledgeChatPage /> },
-    { key: "data", label: "问数分析", icon: Database, component: <DataAskPage /> },
+    { key: "knowledge", label: "RAG Knowledge", icon: BookOpen, component: <KnowledgeChatPage /> },
+    { key: "data", label: "Text-to-SQL", icon: Database, component: <DataAskPage /> },
     { key: "kb", label: "知识库", icon: FileText, component: <KnowledgeBasePage /> },
     { key: "evaluation", label: "评测中心", icon: BarChart3, component: <EvaluationPage /> },
     { key: "settings", label: "系统设置", icon: Settings, component: <SettingsPage /> },
