@@ -23,10 +23,10 @@ function Start-Logged([string]$name, [string]$cwd, [string]$command) {
   $p = Start-Process powershell -WindowStyle Hidden -PassThru -ArgumentList @("-NoProfile", "-Command", "Set-Location -LiteralPath '$cwd'; $command *> '$log'")
   return @{ name = $name; pid = $p.Id; log = $log }
 }
-$processes += Start-Logged "rag" $zhikuRoot "$python -m uvicorn main:app --host 127.0.0.1 --port 8010"
-$processes += Start-Logged "wshu" $wshuRoot "$python -m uvicorn main:app --host 127.0.0.1 --port 8001"
+$processes += Start-Logged "rag" $zhikuRoot "uv run --project '$zhikuRoot' uvicorn main:app --host 127.0.0.1 --port 8010"
+$processes += Start-Logged "wshu" $wshuRoot "uv run --project '$wshuRoot' uvicorn app.main:app --host 127.0.0.1 --port 8001"
 $gateway = Join-Path $platformRoot "gateway"
-$processes += Start-Logged "gateway" $gateway "$python -m uvicorn main:app --host 127.0.0.1 --port 9010"
+$processes += Start-Logged "gateway" $gateway "uv run --project '$gateway' uvicorn main:app --host 127.0.0.1 --port 9010"
 $frontend = Join-Path $platformRoot "frontend"
 if (!(Test-Path (Join-Path $frontend "node_modules"))) { npm --prefix $frontend install }
 $processes += Start-Logged "frontend" $frontend "npm run dev -- --host 127.0.0.1 --port 5173"
