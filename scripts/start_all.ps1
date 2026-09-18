@@ -1,8 +1,8 @@
 $ErrorActionPreference = "Stop"
 $platformRoot = Split-Path -Parent $PSScriptRoot
 $releaseRoot = Split-Path -Parent $platformRoot
-$zhikuRoot = if ($env:ZHIKU_ROOT) { $env:ZHIKU_ROOT } else { Join-Path $releaseRoot "rag-knowledge-agent" }
-$wshuRoot = if ($env:WSHU_ROOT) { $env:WSHU_ROOT } else { Join-Path $releaseRoot "text2sql-data-agent" }
+$zhikuRoot = if ($env:RAG_REPO_DIR) { $env:RAG_REPO_DIR } elseif ($env:ZHIKU_ROOT) { $env:ZHIKU_ROOT } else { Join-Path $releaseRoot "rag-knowledge-agent" }
+$wshuRoot = if ($env:WSHU_REPO_DIR) { $env:WSHU_REPO_DIR } elseif ($env:WSHU_ROOT) { $env:WSHU_ROOT } else { Join-Path $releaseRoot "text2sql-data-agent" }
 $python = if ($env:PYTHON_EXE) { $env:PYTHON_EXE } else { "python" }
 $runtime = Join-Path $platformRoot "runtime"
 $logDir = Join-Path $runtime "logs"
@@ -45,3 +45,4 @@ Write-Host "Gateway:           http://localhost:9010"
 Write-Host "RAG API:           http://localhost:8010/docs"
 Write-Host "Text-to-SQL API:   http://localhost:8001/docs"
 Write-Host "Stop:              powershell -ExecutionPolicy Bypass -File scripts/stop_all.ps1"
+Start-Process "http://localhost:5173"

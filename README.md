@@ -14,17 +14,9 @@ and is not copied into this platform repository.
 
 ## Quick Start
 
-From this repository, run the one-click launcher. It starts the fixed Compose
-project `wshu_platform`, waits for TEI, initializes retrieval, then starts both
-APIs, the Gateway, and the Vite frontend:
+Windows: double-click `START_PLATFORM.bat`.
 
-```powershell
-copy .env.example .env
-powershell -ExecutionPolicy Bypass -File scripts/start_all.ps1
-```
-
-The first Wshu startup may take time while TEI downloads its model into the
-Docker cache volume.
+Complete manual deployment is documented in [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ## Manual Start
 
