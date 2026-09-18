@@ -9,7 +9,7 @@ load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 
 class Settings(BaseModel):
-    zhiku_base_url: str = os.getenv("ZHIKU_BASE_URL", "http://127.0.0.1:8000")
+    zhiku_base_url: str = os.getenv("ZHIKU_BASE_URL", "http://127.0.0.1:8010")
     wshu_base_url: str = os.getenv("WSHU_BASE_URL", "http://127.0.0.1:8001")
     request_timeout_seconds: float = float(os.getenv("REQUEST_TIMEOUT_SECONDS", "120"))
 

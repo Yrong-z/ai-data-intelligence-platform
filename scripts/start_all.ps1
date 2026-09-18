@@ -1,9 +1,41 @@
 $ErrorActionPreference = "Stop"
 $platformRoot = Split-Path -Parent $PSScriptRoot
 $releaseRoot = Split-Path -Parent $platformRoot
+
+function Import-DotEnv([string]$path) {
+  if (!(Test-Path -LiteralPath $path)) { return }
+  foreach ($line in Get-Content -LiteralPath $path) {
+    $text = $line.Trim()
+    if (!$text -or $text.StartsWith("#")) { continue }
+    $parts = $text -split "=", 2
+    if ($parts.Count -ne 2) { continue }
+    $name = $parts[0].Trim()
+    if ($name -notmatch "^[A-Za-z_][A-Za-z0-9_]*$") { continue }
+    $value = $parts[1].Trim()
+    if (($value.StartsWith('"') -and $value.EndsWith('"')) -or ($value.StartsWith("'") -and $value.EndsWith("'"))) {
+      $value = $value.Substring(1, $value.Length - 2)
+    }
+    [Environment]::SetEnvironmentVariable($name, $value, "Process")
+  }
+}
+
+Import-DotEnv (Join-Path $platformRoot ".env")
+
 $zhikuRoot = if ($env:RAG_REPO_DIR) { $env:RAG_REPO_DIR } elseif ($env:ZHIKU_ROOT) { $env:ZHIKU_ROOT } else { Join-Path $releaseRoot "rag-knowledge-agent" }
 $wshuRoot = if ($env:WSHU_REPO_DIR) { $env:WSHU_REPO_DIR } elseif ($env:WSHU_ROOT) { $env:WSHU_ROOT } else { Join-Path $releaseRoot "text2sql-data-agent" }
 $python = if ($env:PYTHON_EXE) { $env:PYTHON_EXE } else { "python" }
+$env:ZHIKU_BASE_URL = if ($env:ZHIKU_BASE_URL) { $env:ZHIKU_BASE_URL } else { "http://127.0.0.1:8010" }
+$env:WSHU_BASE_URL = if ($env:WSHU_BASE_URL) { $env:WSHU_BASE_URL } else { "http://127.0.0.1:8001" }
+$env:VITE_GATEWAY_BASE_URL = if ($env:VITE_GATEWAY_BASE_URL) { $env:VITE_GATEWAY_BASE_URL } else { "http://127.0.0.1:9010" }
+$env:LLM_MODE = if ($env:LLM_MODE) { $env:LLM_MODE } else { "mock" }
+$env:IMPORT_MODE = if ($env:IMPORT_MODE) { $env:IMPORT_MODE } else { "mock" }
+$env:LLM_MODEL = if ($env:LLM_MODEL) { $env:LLM_MODEL } else { "deepseek-v4-flash" }
+$env:LLM_BASE_URL = if ($env:LLM_BASE_URL) { $env:LLM_BASE_URL } else { "https://api.deepseek.com" }
+$env:LLM_API_KEY = if ($null -ne $env:LLM_API_KEY) { $env:LLM_API_KEY } else { "" }
+$env:MINERU_API_TOKEN = if ($null -ne $env:MINERU_API_TOKEN) { $env:MINERU_API_TOKEN } else { "" }
+$env:OPENAI_API_KEY = $env:LLM_API_KEY
+$env:OPENAI_API_BASE = $env:LLM_BASE_URL
+$env:LLM_DEFAULT_MODEL = $env:LLM_MODEL
 $runtime = Join-Path $platformRoot "runtime"
 $logDir = Join-Path $runtime "logs"
 $pidFile = Join-Path $runtime "pids.json"
