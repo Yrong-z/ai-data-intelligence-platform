@@ -55,6 +55,7 @@ export function DataAskPage() {
     <div className="workbench-grid">
       <section className="panel span-2">
         <h2>自然语言问数</h2>
+        <p>Text-to-SQL service is initializing. The embedding model may still be downloading.</p>
         <ChatPanel
           value={query}
           placeholder="请输入数据分析问题"
