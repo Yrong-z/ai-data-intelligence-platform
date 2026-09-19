@@ -11,6 +11,6 @@ $script:PlatformReleaseConfig = @{
   T2S = @{
     Name = "T2S"
     RepoUrl = "https://github.com/Yrong-z/text2sql-data-agent.git"
-    Version = "v1.0.0"
+    Version = "v1.0.1"
   }
 }
