@@ -16,17 +16,22 @@ export function KnowledgeChatPage() {
   const [busy, setBusy] = useState(false);
   const [itemName, setItemName] = useState("");
   const [uploadMessage, setUploadMessage] = useState("");
+  const [importing, setImporting] = useState(false);
 
   async function upload(file?: File) {
     if (!file) return;
+    setImporting(true);
     setUploadMessage("正在导入...");
     try {
-      const result = await importDocument(file, itemName || undefined);
+      const result = await importDocument(file);
       if (result.code !== 0 || !result.data?.item_name) throw new Error(result.message || "导入失败");
       setItemName(result.data.item_name);
-      setUploadMessage(`已导入：${result.data.item_name}`);
+      const chunks = typeof result.data.chunks_count === "number" ? result.data.chunks_count : "未知";
+      setUploadMessage(`已导入：${result.data.item_name}；chunks: ${chunks}`);
     } catch (err) {
       setUploadMessage(err instanceof Error ? err.message : "导入失败");
+    } finally {
+      setImporting(false);
     }
   }
 
@@ -66,13 +71,15 @@ export function KnowledgeChatPage() {
     <div className="workbench-grid">
       <section className="panel span-2">
         <h2>智库问答</h2>
-        <input type="file" accept=".pdf,.md,.markdown" onChange={(event) => upload(event.target.files?.[0])} />
+        <input type="file" disabled={importing || busy} accept=".pdf,.md,.markdown" onChange={(event) => upload(event.target.files?.[0])} />
         <input value={itemName} onChange={(event) => setItemName(event.target.value)} placeholder="item_name（导入后自动填充）" />
         {uploadMessage ? <p>{uploadMessage}</p> : null}
         <ChatPanel
           value={query}
           placeholder="请输入企业知识库问题"
           busy={busy}
+          disabled={importing}
+          disabledLabel="文档导入中"
           onChange={setQuery}
           onSubmit={submit}
         />

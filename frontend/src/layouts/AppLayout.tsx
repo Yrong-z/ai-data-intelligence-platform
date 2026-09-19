@@ -13,8 +13,8 @@ export function AppLayout() {
 
   const pages = [
     { key: "dashboard", label: "总览", icon: Gauge, component: <DashboardPage /> },
-    { key: "knowledge", label: "RAG Knowledge", icon: BookOpen, component: <KnowledgeChatPage /> },
-    { key: "data", label: "Text-to-SQL", icon: Database, component: <DataAskPage /> },
+    { key: "knowledge", label: "RAG 知识问答", icon: BookOpen, component: <KnowledgeChatPage /> },
+    { key: "data", label: "T2S 数据问数", icon: Database, component: <DataAskPage /> },
     { key: "kb", label: "知识库", icon: FileText, component: <KnowledgeBasePage /> },
     { key: "evaluation", label: "评测中心", icon: BarChart3, component: <EvaluationPage /> },
     { key: "settings", label: "系统设置", icon: Settings, component: <SettingsPage /> },
@@ -45,7 +45,7 @@ export function AppLayout() {
       </aside>
       <section className="content">
         <div className="page-header">
-          <p className="eyebrow">AI-BI-Knowledge-Platform</p>
+          <p className="eyebrow">AI 数据智能平台</p>
           <h1>{current.label}</h1>
         </div>
         {current.component}

@@ -4,6 +4,11 @@ logs/
 tmp/
 output/
 .env
+.env.*.local
+.playwright-cli/
+runtime/logs/
+runtime/pids.json
+output/
 .venv/
 __pycache__/
 *.py[cod]

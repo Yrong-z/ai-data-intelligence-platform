@@ -3,23 +3,23 @@ export function DashboardPage() {
     <div className="dashboard-grid">
       <section className="hero-panel">
         <h2>企业级 AI 智能知识与数据分析平台</h2>
-        <p>统一接入 ZhiKu 智库服务与 Wshu 问数服务，面向商业化演示、工程化交付和面试深挖。</p>
+        <p>统一集成 RAG 知识问答与 T2S 数据问数能力，提供文档知识检索、自然语言数据查询与统一服务入口。</p>
       </section>
       <section className="metric-card">
-        <span>服务形态</span>
-        <strong>前端统一 / 后端分离</strong>
+        <span>服务架构</span>
+        <strong>统一前端 / 独立后端</strong>
       </section>
       <section className="metric-card">
-        <span>智库能力</span>
+        <span>知识问答</span>
         <strong>RAG + 引用溯源</strong>
       </section>
       <section className="metric-card">
-        <span>问数能力</span>
-        <strong>Text-to-SQL + SQL 校验</strong>
+        <span>数据问数</span>
+        <strong>T2S + SQL 校验</strong>
       </section>
       <section className="metric-card">
-        <span>工程化</span>
-        <strong>Gateway + Docs + Evals</strong>
+        <span>工程能力</span>
+        <strong>统一网关 + 文档 + 评测</strong>
       </section>
     </div>
   );

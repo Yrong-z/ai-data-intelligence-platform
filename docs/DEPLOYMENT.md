@@ -1,32 +1,34 @@
-# Deployment
+# 部署说明
 
-## Configuration entry point
+## 配置入口
 
-For the unified platform, copy the root `.env.example` to `.env` and edit only that file. The launcher reads it from the platform directory and passes compatible values to both backends. `.env` is ignored by Git.
+统一平台只配置 `ai-data-intelligence-platform/.env`。复制 `.env.example` 为 `.env` 后编辑，启动脚本会把兼容配置传递给两个后端。`.env` 已被 Git 忽略，禁止提交。
 
-When running either backend independently, use that repository's own `.env.example` and `.env` instead.
+单独运行后端时，才使用对应子项目自己的 `.env.example` 和 `.env`。
 
 The platform maps:
 
-- `LLM_API_KEY` → Wshu `LLM_API_KEY` and ZhiKu `OPENAI_API_KEY`
-- `LLM_BASE_URL` → Wshu `LLM_BASE_URL` and ZhiKu `OPENAI_API_BASE`
-- `LLM_MODEL` → Wshu `LLM_MODEL` and ZhiKu `LLM_DEFAULT_MODEL`
-- `RAG_MODE` derives the backend mode switches; `MINERU_API_TOKEN` is passed to ZhiKu for PDF Real import.
+- `LLM_API_KEY` → T2S `LLM_API_KEY` 和 RAG `OPENAI_API_KEY`
+- `LLM_BASE_URL` → T2S `LLM_BASE_URL` 和 RAG `OPENAI_API_BASE`
+- `LLM_MODEL` → T2S `LLM_MODEL` 和 RAG `LLM_DEFAULT_MODEL`
+- `RAG_MODE` 决定 RAG 运行模式；`MINERU_API_TOKEN` 用于 PDF Real 导入。
 
-## RAG modes
+## RAG 模式
 
-Set only `RAG_MODE` in the platform `.env`.
+只需在平台 `.env` 中设置 `RAG_MODE`。
 
-- `demo`: derives `LLM_MODE=mock`, `IMPORT_MODE=mock`, and `MOCK_SEARCH_EMBEDDING=true`; fixed demo corpus remains available.
-- `real`: derives `LLM_MODE=real`, `IMPORT_MODE=real`, and `MOCK_SEARCH_EMBEDDING=false`; evidence must come from imported Milvus records.
+- `demo`：使用本地 Demo 配置，不要求 Milvus 和真实 API Key。
+- `real`：使用真实导入和检索，需要 Milvus、BGE-M3；真实回答还需要 API Key。
 
-In Real mode the launcher starts the release RAG Milvus Compose project (`rag_platform`) before the RAG API. The BGE-M3 `BGEM3EmbeddingFunction` loads `BAAI/bge-m3` and uses its normal Hugging Face cache; model weights are not committed.
+Real 模式会先启动 RAG 的 Milvus Compose 项目（`rag_platform`），再启动 RAG API。BGE-M3 使用 Hugging Face 缓存，模型文件不会提交到仓库。
 
-Markdown Real RAG does not require MinerU. PDF Real RAG requires `MINERU_API_TOKEN`.
+首次使用 Real RAG 时，BGE-M3 可能需要下载约 2GB 模型，首次初始化可能持续数分钟；期间不要误认为系统卡死。平台运行日志位于 `ai-data-intelligence-platform/runtime/logs/`。
 
-## LLM examples
+Markdown 的 Real RAG 不需要 MinerU；PDF 的 Real RAG 需要 `MINERU_API_TOKEN`。
 
-DeepSeek:
+## LLM 配置示例
+
+DeepSeek：
 
 ```dotenv
 LLM_API_KEY=your-key-here
@@ -34,7 +36,7 @@ LLM_BASE_URL=https://api.deepseek.com
 LLM_MODEL=deepseek-v4-flash
 ```
 
-Other OpenAI-compatible providers use their compatible endpoint and model name:
+其他 OpenAI 兼容服务填写对应地址和模型名称：
 
 ```dotenv
 LLM_API_KEY=your-key-here
@@ -42,23 +44,23 @@ LLM_BASE_URL=https://your-provider.example.com/v1
 LLM_MODEL=your-model-name
 ```
 
-For a safe local demo, leave `LLM_API_KEY` empty and use `RAG_MODE=demo`. Real RAG uses `RAG_MODE=real`; the launcher derives the lower-level switches.
+本地 Demo 可以留空 `LLM_API_KEY` 并使用 `RAG_MODE=demo`。Real RAG 使用 `RAG_MODE=real`，启动脚本会自动设置底层模式。
 
-## First-time setup
+## 第一次使用
 
-Run `SETUP_PLATFORM.bat` once. It runs `uv sync` for the three Python projects, installs frontend dependencies, and pulls required Docker images. If a package download times out, rerun setup; the start script will not reinstall dependencies.
+首次双击 `SETUP_PLATFORM.bat`。脚本会为三个 Python 项目执行 `uv sync`、安装前端依赖并拉取 Docker 镜像。依赖下载超时时重新执行即可；启动脚本不会重复安装依赖。
 
-## One-click startup
+## 一键启动
 
-With Docker Desktop/Linux engine, uv, npm, and the three sibling repositories present:
+确认 Docker Desktop、uv、npm 和三个子项目都已准备好后：
 
 ```text
 START_PLATFORM.bat
 ```
 
-The launcher starts RAG, Gateway, Frontend, Wshu infrastructure, retrieval initialization, and Wshu API. The first Wshu start may download `BAAI/bge-large-zh-v1.5` into a Docker named volume and requires internet access.
+启动脚本会启动 RAG、统一网关、前端、T2S 基础服务、检索初始化和 T2S API。第一次启动可能下载 `BAAI/bge-large-zh-v1.5`，需要网络连接。
 
-## Manual startup
+## 手动启动
 
 From the platform root:
 
@@ -74,18 +76,18 @@ npm --prefix frontend install
 npm --prefix frontend run dev -- --host 127.0.0.1 --port 5173
 ```
 
-## Access URLs
+## 访问地址
 
-- Frontend: http://localhost:5173
-- Gateway: http://localhost:9010
-- RAG API: http://localhost:8010/docs
-- Text-to-SQL API: http://localhost:8001/docs
+- 前端：http://localhost:5173
+- 统一网关：http://localhost:9010
+- RAG API：http://localhost:8010/docs
+- T2S API：http://localhost:8001/docs
 
-## Custom repository directories
+## 自定义子项目目录
 
-Set `RAG_REPO_DIR` and `WSHU_REPO_DIR` in the platform `.env` to absolute or relative paths. Relative paths are resolved by the launcher from the release workspace layout; the default is `../rag-knowledge-agent` and `../text2sql-data-agent`.
+可以在平台 `.env` 中设置 `RAG_REPO_DIR` 和 `WSHU_REPO_DIR`。相对路径按发布目录结构解析，默认分别为 `../rag-knowledge-agent` 和 `../text2sql-data-agent`。
 
-## Stop
+## 停止服务
 
 ```powershell
 STOP_PLATFORM.bat
@@ -97,9 +99,9 @@ or:
 powershell -ExecutionPolicy Bypass -File scripts/stop_all.ps1
 ```
 
-## Common issues
+## 常见问题
 
-- Missing Docker, uv, npm, or a sibling repository stops preflight with a clear error.
-- An empty LLM key keeps the platform startable, but real Text-to-SQL requests report that the LLM provider is not configured.
-- The first embedding startup is slow while TEI downloads the model; later starts reuse the Docker volume.
-- If a port is occupied, stop the process using it or change the service configuration consistently before starting again.
+- 缺少 Docker、uv、npm 或子项目时，启动前检查会给出明确提示。
+- LLM Key 为空时平台仍可启动，但真实 T2S 查询会提示未配置 LLM。
+- 第一次向量化启动较慢，TEI 下载模型后会复用 Docker 卷。
+- 端口被占用时，先停止占用进程再重新启动。

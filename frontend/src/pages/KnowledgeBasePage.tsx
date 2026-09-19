@@ -2,7 +2,7 @@ export function KnowledgeBasePage() {
   return (
     <section className="panel">
       <h2>知识库管理</h2>
-      <p>后续接入知识库列表、文档上传、导入任务、版本管理和权限配置。</p>
+      <p>知识库管理暂未开放，本次发布通过 RAG 知识问答页面完成文档导入与检索。</p>
     </section>
   );
 }
