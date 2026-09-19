@@ -57,8 +57,15 @@ function Ensure-Backend([hashtable]$definition, [string]$path) {
     Write-Host "[$name] backend missing; cloning fixed release $version..."
     $parent = Split-Path -Parent $path
     New-Item -ItemType Directory -Force -Path $parent | Out-Null
-    $cloneOutput = @(& git clone $repoUrl $path 2>&1)
-    if ($LASTEXITCODE -ne 0) {
+    $previousErrorAction = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+      $cloneOutput = @(& git clone $repoUrl $path 2>&1)
+      $cloneExitCode = $LASTEXITCODE
+    } finally {
+      $ErrorActionPreference = $previousErrorAction
+    }
+    if ($cloneExitCode -ne 0) {
       $details = ($cloneOutput -join [Environment]::NewLine).Trim()
       throw "[$name] 下载失败`n仓库：$repoUrl`n版本：$version`n请检查：`n1. 网络连接`n2. GitHub 是否可访问`n3. 仓库地址和版本是否正确`n修复后重新运行 SETUP_PLATFORM.bat。`n$details"
     }
