@@ -5,12 +5,12 @@
 $script:PlatformReleaseConfig = @{
   RAG = @{
     Name = "RAG"
-    RepoUrl = "https://github.com/__GITHUB_USERNAME__/rag-knowledge-agent.git"
+    RepoUrl = "https://github.com/Yrong-z/rag-knowledge-agent.git"
     Version = "v1.0.0"
   }
   T2S = @{
     Name = "T2S"
-    RepoUrl = "https://github.com/__GITHUB_USERNAME__/text2sql-data-agent.git"
+    RepoUrl = "https://github.com/Yrong-z/text2sql-data-agent.git"
     Version = "v1.0.0"
   }
 }
