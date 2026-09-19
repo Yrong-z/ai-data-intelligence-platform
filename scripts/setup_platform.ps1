@@ -138,17 +138,27 @@ Ensure-Backend $PlatformReleaseConfig.T2S $wshuRoot
 
 Write-Host "[1/5] Syncing rag-knowledge-agent..."
 uv sync --project $ragRoot
+if ($LASTEXITCODE -ne 0) { throw "RAG 依赖安装失败。请检查网络和 uv 配置后重新运行 SETUP_PLATFORM.bat。" }
 Write-Host "[2/5] Syncing text2sql-data-agent..."
 uv sync --project $wshuRoot
+if ($LASTEXITCODE -ne 0) { throw "T2S 依赖安装失败。请检查网络和 uv 配置后重新运行 SETUP_PLATFORM.bat。" }
 Write-Host "[3/5] Syncing gateway..."
 uv sync --project $gatewayRoot
+if ($LASTEXITCODE -ne 0) { throw "Gateway 依赖安装失败。请检查网络和 uv 配置后重新运行 SETUP_PLATFORM.bat。" }
 Write-Host "[4/5] Installing frontend dependencies..."
 if (Test-Path (Join-Path $frontendRoot "package-lock.json")) { npm --prefix $frontendRoot ci } else { npm --prefix $frontendRoot install }
+if ($LASTEXITCODE -ne 0) { throw "Frontend 依赖安装失败。请检查网络和 npm 配置后重新运行 SETUP_PLATFORM.bat。" }
 Write-Host "[5/5] Pulling Docker images..."
 $ragCompose = Join-Path $ragRoot "docker-compose.milvus.yml"
 $wshuCompose = Join-Path $wshuRoot "docker/docker-compose.yaml"
-if (Test-Path $ragCompose) { docker compose -p rag_platform -f $ragCompose pull }
-if (Test-Path $wshuCompose) { docker compose -p wshu_platform -f $wshuCompose pull }
+if (Test-Path $ragCompose) {
+  docker compose -p rag_platform -f $ragCompose pull
+  if ($LASTEXITCODE -ne 0) { throw "RAG Docker 镜像准备失败。请启动 Docker Desktop 后重新运行 SETUP_PLATFORM.bat。" }
+}
+if (Test-Path $wshuCompose) {
+  docker compose -p wshu_platform -f $wshuCompose pull
+  if ($LASTEXITCODE -ne 0) { throw "T2S Docker 镜像准备失败。请启动 Docker Desktop 后重新运行 SETUP_PLATFORM.bat。" }
+}
 Write-Host ""
 Write-Host "SETUP COMPLETE"
 Write-Host "RAG release: $($PlatformReleaseConfig.RAG.Version)"
